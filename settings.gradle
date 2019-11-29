@@ -1,0 +1,3 @@
+rootProject.name = 'Spring-Cloud-Greenwich-Demo'
+include 'eureka-server'
+

@@ -1,0 +1,42 @@
+version: '3'
+services:
+  server1:
+    build:
+      context: ../
+      dockerfile: .deploy/Dockerfile
+      args:
+        JAR_FILE: build/libs/*.jar
+        SCRIPT_ENTRYPOINT_PATH: .deploy
+    image: ryan/eureka-server
+    command: ["--eureka.instance.hostname=server1", "--eureka.instance.instance-id=server1", "--eureka.client.service-url.defaultZone=http://server2:9001/eureka,http://server3:9001/eureka"]
+    ports:
+      - "9001:9001"
+    networks:
+      spring-cloud-net:
+        aliases:
+          - server1
+  server2:
+    image: ryan/eureka-server
+    links:
+      - server1
+    command: ["--eureka.instance.hostname=server2", "--eureka.instance.instance-id=server2", "--eureka.client.service-url.defaultZone=http://server1:9001/eureka,http://server3:9001/eureka"]
+    ports:
+      - "9002:9001"
+    networks:
+      spring-cloud-net:
+        aliases:
+          - server2
+  server3:
+    image: ryan/eureka-server
+    links:
+      - server2
+    command: ["--eureka.instance.hostname=server3", "--eureka.instance.instance-id=server3", "--eureka.client.service-url.defaultZone=http://server2:9001/eureka,http://server1:9001/eureka"]
+    ports:
+      - "9003:9001"
+    networks:
+      spring-cloud-net:
+        aliases:
+          - server3
+networks:
+  spring-cloud-net:
+    driver: bridge

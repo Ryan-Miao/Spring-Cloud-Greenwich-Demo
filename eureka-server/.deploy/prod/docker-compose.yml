@@ -1,0 +1,7 @@
+version: '3'
+services:
+  eureka:
+    image: ryan/eureka-server:release-a91b126
+    command: ["--spring.profiles.active=prod2"]
+    ports:
+      - "9001:9001"

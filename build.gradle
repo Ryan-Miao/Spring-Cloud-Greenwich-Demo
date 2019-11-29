@@ -1,0 +1,27 @@
+buildscript {
+    repositories {
+        maven { url "http://maven.aliyun.com/nexus/content/groups/public"}
+        maven { url "https://repo.spring.io/libs-snapshot-local" }
+        jcenter()
+    }
+    dependencies {
+        classpath "io.spring.gradle:dependency-management-plugin:1.0.2.RELEASE"
+    }
+}
+
+
+ext {
+    spring_boot_version = "2.1.10.RELEASE"
+    spring_cloud_version = 'Greenwich.SR4'
+}
+
+repositories {
+    maven { url 'https://maven.aliyun.com/repository/public/' }
+    maven { url 'https://maven.aliyun.com/repository/spring/'}
+    mavenLocal()
+    mavenCentral()
+}
+
+group 'com.demo'
+version '1.0.0-SNAPSHOT'
+

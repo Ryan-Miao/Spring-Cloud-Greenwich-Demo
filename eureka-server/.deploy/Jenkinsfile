@@ -1,0 +1,64 @@
+node {
+
+    stage('Prepare') {
+        echo "1.Prepare environment for build"
+        checkout scm
+        updateGitlabCommitStatus name: 'build', state: 'running'
+
+        docker_host = "your-docker-host-repo"
+        project_name = "eureka-server"
+        img_name = "ryan/eureka-server"
+        docker_img_name = "${docker_host}/${img_name}"
+
+        script {
+            build_tag = sh(returnStdout: true, script: 'git rev-parse --short HEAD').trim()
+            build_tag = "${env.BRANCH_NAME}-${build_tag}"
+
+            currentBuild.displayName = BUILD_NUMBER + "_" +build_tag
+        }
+
+        echo "branch: ${env.BRANCH_NAME}\n" +
+                "docker_img_name: ${docker_img_name}\n" +
+                "build_tag: ${build_tag}\n" +
+                "docker_host: ${docker_host}"
+    }
+
+    stage('Compile And UnitTest') {
+        echo "2.Compile the code"
+        try {
+            sh "./gradlew ${project_name}:clean ${project_name}:build"
+        } catch (Exception ex) {
+            updateGitlabCommitStatus name: 'build', state: 'failed'
+            throw ex;
+        } finally {
+            echo "compile done!"
+        }
+    }
+
+
+
+    stage('Build Docker Image') {
+        echo "3.Build Docker Image Stage"
+        sh "sed -i 's/<DOCKER-HOST>/${docker_host}/g' ${project_name}/.deploy/Dockerfile"
+        sh "docker build -t ${docker_img_name}:${build_tag} " +
+                " --build-arg JAR_FILE=${project_name}/build/libs/*.jar " +
+                " --build-arg SCRIPT_ENTRYPOINT_PATH=${project_name}/.deploy " +
+                " -f ${project_name}/.deploy/Dockerfile ."
+    }
+
+    stage('Push Docker Image') {
+        echo "4.Push Docker Image Stage"
+        sh "docker tag ${docker_img_name}:${build_tag} ${docker_img_name}:latest"
+        withCredentials([usernamePassword(credentialsId: 'docker-register-sz-shuwei', passwordVariable: 'dockerPassword', usernameVariable: 'dockerUser')]) {
+            sh "docker login -u ${dockerUser} -p ${dockerPassword} ${docker_host}"
+            sh "docker push ${docker_img_name}:latest"
+            sh "docker push ${docker_img_name}:${build_tag}"
+        }
+    }
+
+
+
+
+
+
+}
