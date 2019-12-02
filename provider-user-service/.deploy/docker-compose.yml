@@ -1,0 +1,23 @@
+version: '3.7'
+services:
+  user-service:
+    build:
+      context: ../
+      dockerfile: .deploy/Dockerfile
+      args:
+        JAR_FILE: build/libs/*.jar
+        SCRIPT_ENTRYPOINT_PATH: .deploy
+    image: ryan/user-service
+    command: ["--eureka.client.service-url.defaultZone=http://server1:9001/eureka,http://server2:9001/eureka,http://server3:9001/eureka"]
+#    ports:
+#      - "8081:8081"
+    deploy:
+      mode: replicated
+      replicas: 2
+    networks:
+      spring-cloud-net:
+        aliases:
+          - user-service
+networks:
+  spring-cloud-net:
+    driver: bridge

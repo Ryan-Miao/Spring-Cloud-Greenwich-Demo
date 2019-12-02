@@ -1,0 +1,61 @@
+node('slave') {
+
+    stage('Prepare') {
+        echo "1.Prepare environment for build"
+        checkout scm
+
+        docker_host = "YOUR-DOCKER-PRIVATE-HOST"
+        project_name = "provider-user-service"
+        k8s_label = "provider-user-service"
+
+        // 配置job传递参数docker_img_version和deploy env
+        if (docker_img_version == null || docker_img_version == '') {
+            throw new RuntimeException("service的镜像id docker_img_version 不能为空");
+        }
+
+        if (deploy_env == null || deploy_env == '') {
+            throw new RuntimeException("部署环境　deploy_env 不能为空");
+        }
+
+        docker_img = project_name ":" + docker_img_version
+
+        switch (deploy_env) {
+            case 'dev':
+                k8s_cluster_node = "config-dev"
+                break;
+            case 'test':
+                k8s_cluster_node = 'config-test'
+                break
+            case 'prod':
+                k8s_cluster_node = 'config-prod'
+                break
+            default:
+                throw new RuntimeException("deploy_env必须是dev/test/prod之一")
+        }
+
+
+        currentBuild.displayName = BUILD_NUMBER + "_" + docker_img
+
+        echo    "docker_img: ${docker_img}\n" +
+                "deploy_env: ${deploy_env}\n" +
+                "k8s_label: ${k8s_label}\n" +
+                "k8s_cluster_node: ${k8s_cluster_node}\n" +
+                "docker_host: ${docker_host}"
+    }
+
+    stage("Deploy to k8s - ${deploy_env}") {
+        echo "2. Deploy Stage"
+
+        def k8s_conf = "${project_name}/.deploy/k8s-${deploy_env}.yaml"
+        sh "sed -i 's;<DOCKER-HOST>;${docker_host};g;s;<DOCKER-IMG>;${docker_img};g;s;<k8s-label>;${k8s_label};g' " + k8s_conf
+        sh "kubectl --kubeconfig /home/jenkins/.kube/${k8s_cluster_node} " +
+                "apply -f ${WORKSPACE}/${k8s_conf} --record"
+        sh "sleep 15"
+        echo "创建的实例："
+        sh "kubectl --kubeconfig /home/jenkins/.kube/${k8s_cluster_node}  get po -o wide | grep ${k8s_label}"
+        echo "您的应用svc: "
+        sh "kubectl --kubeconfig /home/jenkins/.kube/${k8s_cluster_node}  get svc | grep ${k8s_label}"
+    }
+
+
+}

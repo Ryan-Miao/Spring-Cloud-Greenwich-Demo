@@ -12,11 +12,10 @@ dependencyManagement {
     }
 }
 
-group 'com.demo.platform'
+group 'com.demo.service'
 version '1.0.0-SNAPSHOT'
 
 sourceCompatibility = 1.8
-
 
 repositories {
     maven { url 'https://maven.aliyun.com/repository/public/' }
@@ -27,6 +26,15 @@ repositories {
 
 dependencies {
     implementation('org.springframework.boot:spring-boot-starter-actuator')
-    implementation('org.springframework.cloud:spring-cloud-starter-netflix-eureka-server')
-}
+    implementation('org.springframework.boot:spring-boot-starter-web')
+    implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
+    implementation 'org.springframework.cloud:spring-cloud-starter-netflix-hystrix'
 
+    annotationProcessor 'org.projectlombok:lombok:1.18.2'
+    compileOnly 'org.projectlombok:lombok:1.18.2'
+
+    compile group: 'io.springfox', name: 'springfox-swagger2', version: '2.9.2'
+    compile group: 'io.springfox', name: 'springfox-swagger-ui', version: '2.9.2'
+
+    testImplementation('junit:junit:4.12')
+}
