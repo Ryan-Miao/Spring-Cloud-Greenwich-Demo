@@ -1,0 +1,53 @@
+hystrix.command.fallbackcmd.execution.isolation.thread.timeoutInMilliseconds: 2000
+spring:
+  application:
+    name: service-gateway
+  profiles:
+    active: dev
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+      default-filters:
+
+
+server:
+  port: 8088
+eureka:
+  instance:
+    prefer-ip-address: true
+  client:
+    register-with-eureka: true
+    registry-fetch-interval-seconds: 5
+
+
+
+#eureka客户端ribbon刷新时间
+#默认30s
+ribbon.ServerListRefreshInterval: 5000
+ribbon.ReadTimeout: 50000
+ribbon.SocketTimeout: 50000
+ribbon.ConnectTimeout: 5000
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+
+#throttle:
+#  # 令牌最大容量
+#  capacity: 1
+#  # 每次新增多少令牌
+#  refillTokens: 1
+#  # 多少秒新增一次
+#  refillPeriod: 5
+
+mybatis:
+#  type-aliases-package: com.example.domain.model
+#  type-handlers-package: com.example.typehandler
+  configuration:
+    map-underscore-to-camel-case: true
+    default-fetch-size: 100
+    default-statement-timeout: 30

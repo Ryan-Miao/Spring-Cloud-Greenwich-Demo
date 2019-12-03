@@ -1,0 +1,39 @@
+version: '3.7'
+services:
+  db:
+    image: mysql
+    command: --default-authentication-plugin=mysql_native_password --max_allowed_packet=1024M --max_connections=1000 --max_user_connections=900
+    restart: always
+    volumes:
+      - ./my-conf:/etc/mysql/conf.d
+      - ./my-data:/var/lib/mysql
+      - ./script:/docker-entrypoint-initdb.d
+    environment:
+      MYSQL_ROOT_PASSWORD: example
+    ports:
+      - 3306:3306
+    networks:
+      spring-cloud-net:
+        aliases:
+          - service-gateway-db
+  service-gateway:
+    build:
+      context: ../
+      dockerfile: .deploy/Dockerfile
+      args:
+        JAR_FILE: build/libs/*.jar
+        SCRIPT_ENTRYPOINT_PATH: .deploy
+    image: ryan/service-gateway
+    command: ["--spring.datasource.url=jdbc:mysql://service-gateway-db:3306/spring_cloud_demo", "--eureka.client.service-url.defaultZone=http://server1:9001/eureka,http://server2:9001/eureka,http://server3:9001/eureka"]
+    ports:
+      - "8088:8088"
+    depends_on:
+      - db
+    networks:
+      spring-cloud-net:
+        aliases:
+          - service-gateway
+
+networks:
+  spring-cloud-net:
+    driver: bridge

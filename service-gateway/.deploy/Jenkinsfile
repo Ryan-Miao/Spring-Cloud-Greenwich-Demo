@@ -6,8 +6,8 @@ node {
         updateGitlabCommitStatus name: 'build', state: 'running'
 
         docker_host = "your-docker-host-repo"
-        project_name = "provider-user-service"
-        img_name = "ryan/provider-user-service"
+        project_name = "service-gateway"
+        img_name = "ryan/service-gateway"
         docker_img_name = "${docker_host}/${img_name}"
 
         script {

@@ -95,3 +95,6 @@ derbyDB
 derby.log
 *.log
 **/resources/rebel.xml
+
+my-conf/
+my-data/

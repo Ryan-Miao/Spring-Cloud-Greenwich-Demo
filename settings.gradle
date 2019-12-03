@@ -1,4 +1,6 @@
 rootProject.name = 'Spring-Cloud-Greenwich-Demo'
 include 'eureka-server'
 include 'provider-user-service'
+include 'service-gateway'
+include 'common-model'
 

@@ -1,0 +1,17 @@
+
+eureka.client.service-url.defaultZone: http://localhost:9001/eureka,http://localhost:9002/eureka,http://localhost:9003/eureka
+
+logging:
+  level:
+#    org.springframework.cloud.gateway: TRACE
+#    org.springframework.http.server.reactive: DEBUG
+#    org.springframework.web.reactive: DEBUG
+#    reactor.ipc.netty: DEBUG
+#    reactor.netty: DEBUGAdditionalRoutes
+    com.demo.platform.servicegateway.config.ThrottleGatewayFilter: DEBUG
+
+spring:
+  datasource:
+    username: root
+    password: example
+    url: jdbc:mysql://localhost:3306/spring_cloud_demo?autoReconnect=true&useUnicode=true&createDatabaseIfNotExist=true&characterEncoding=utf8&useSSL=true&serverTimezone=UTC

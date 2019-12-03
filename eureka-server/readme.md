@@ -33,7 +33,7 @@ docker-compose up
 4. 保证cloud和spring boot版本一致。比如 cloud:Greenwich.SR4  -- boot:2.1.10.RELEASE
 5. 保证加载了org.springframework.boot:spring-boot-starter-actuator
 
-通常默认加载health check, 通过比较check结果来计算副本。
+通常默认加载health check, 通过比较check结果来计算副本, 实在不行就忽略即可。
 
 ```java
 //com.netflix.eureka.util.StatusUtil.isReplicaAvailable
