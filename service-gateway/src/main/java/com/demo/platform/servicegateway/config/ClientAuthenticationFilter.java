@@ -26,6 +26,7 @@ import org.springframework.web.server.ServerWebExchangeDecorator;
 import reactor.core.publisher.Mono;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -38,6 +39,7 @@ public class ClientAuthenticationFilter implements GlobalFilter, Ordered {
 
     private static final String HEADER_KEY_CLIENT = "client-id";
     private static final String HEADER_KEY_SECRET = "client-secret";
+    private static final List<String> IGNORE_PATH = Arrays.asList("/swagger-*/**", "/webjars/**");
     private final PathMatcher pathMatcher = new AntPathMatcher();
     private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
@@ -52,6 +54,13 @@ public class ClientAuthenticationFilter implements GlobalFilter, Ordered {
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         ServerHttpRequest request = exchange.getRequest();
+
+        String value = request.getPath().value();
+        boolean b = IGNORE_PATH.stream().anyMatch(path -> pathMatcher.match(path, value));
+        if (b) {
+            return chain.filter(exchange);
+        }
+
         HttpHeaders headers = request.getHeaders();
         String clientId = headers.getFirst(HEADER_KEY_CLIENT);
         String clientSecret = headers.getFirst(HEADER_KEY_SECRET);
@@ -76,7 +85,7 @@ public class ClientAuthenticationFilter implements GlobalFilter, Ordered {
         List<String> authPattern = clientModel.getAuthPattern();
         if (authPattern != null && !authPattern.isEmpty()) {
             ServerWebExchangeDecorator decorator = (ServerWebExchangeDecorator) exchange;
-            String originalPath = decorator.getDelegate().getRequest().getPath().toString();
+            String originalPath = decorator.getDelegate().getRequest().getPath().value();
             for (String pattern : authPattern) {
                 boolean match = pathMatcher.match(pattern, originalPath);
                 if (match) {

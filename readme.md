@@ -19,7 +19,12 @@ docker-compose up
 cd service-gateway/.deploy
 docker-compose up
 
-访问http://localhost:8088/USER-SERVICE/users
+
+GET http://localhost:8088/USER-SERVICE/users
+header:
+client-secret:123456
+client-id:ryan
+
 
 ```
 
